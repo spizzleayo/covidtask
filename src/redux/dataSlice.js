@@ -1,36 +1,24 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
+import axios from "axios";
 
 export const fetchData = createAsyncThunk("data/fetchData", async () => {
-  const data = await fetch("https://covidnigeria.herokuapp.com/api").then(
-    (res) => res.json()
-  );
-  console.log("data---------", data);
-  return data;
+  return axios
+    .get("https://covidnigeria.herokuapp.com/api")
+    .then((res) => res.data);
 });
 
 const dataSlice = createSlice({
   name: "data",
-  initialState: {
-    data: [],
-    response: {
-      status: null,
-      message: null,
-    },
-    loading: false,
-  },
+  initialState: { entities: [], loading: "idle" },
   reducers: {},
-  extraReducers: {
-    [fetchData.pending]: (state, action) => {
-      state.response.status = "loading";
-    },
+  extraReducers: (builder) => {
+    builder.addCase(fetchData.pending, (state) => {
+      state.loading = [];
+    });
 
-    [fetchData.fulfilled]: (state, { payload }) => {
-      state.data = payload;
-      state.response.status = "success";
-    },
-    [fetchData.rejected]: (state, { payload }) => {
-      state.response.reducersstatus = "failed";
-    },
+    builder.addCase(fetchData.fulfilled, (state, action) => {
+      state.entities = action.payload.data;
+    });
   },
 });
 
